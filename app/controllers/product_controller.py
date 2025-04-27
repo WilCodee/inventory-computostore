@@ -104,3 +104,37 @@ class ProductController:
             ProductController.__update(collection, updated_product)
         finally:
             connection.close_connection()
+
+    @staticmethod
+    def get_product_by_code(product_code: str) -> Product:
+        """
+        Obtiene un producto de la base de datos por su código y lo devuelve como un objeto Product.
+        """
+        connection = ConnectMongo()
+        try:
+            collection = connection.get_collection("products")
+
+            # Buscar el producto por su código
+            product_data = collection.find_one({"product_code": product_code})
+            if not product_data:
+                raise ProductNotFoundError()
+
+            # Convertir los datos del producto en un objeto Product
+            product = Product(
+                product_code=product_data.get("product_code"),
+                brand=product_data.get("brand"),
+                model=product_data.get("model"),
+                serial_number=product_data.get("serial_number"),
+                name=product_data.get("name"),
+                description=product_data.get("description"),
+                stock=product_data.get("stock"),
+                price=Decimal(product_data.get("price").to_decimal()),
+                memory_ram=product_data.get("memory_ram"),
+                memory_rom=product_data.get("memory_rom"),
+                processor=product_data.get("processor"),
+                date_creation=product_data.get("date_creation")
+            )
+            product.date_update = product_data.get("date_update")
+            return product
+        finally:
+            connection.close_connection()
