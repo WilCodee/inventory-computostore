@@ -4,7 +4,7 @@ from decimal import Decimal
 
 class Product:
     def __init__(self, product_code: str, brand: str, model: str, serial_number: str, name: str, description: str,
-                 stock: str, price: Decimal, memory_ram: int = None, memory_rom: int = None, processor: str = None):
+                 stock: int, price: Decimal, memory_ram: int = None, memory_rom: int = None, processor: str = None):
         self.__product_code = product_code
         self.__brand = brand
         self.__model = model
@@ -71,7 +71,7 @@ class Product:
         return self.__stock
 
     @stock.setter
-    def stock(self, stock: str):
+    def stock(self, stock: int):
         self.__stock = stock
 
     @property
