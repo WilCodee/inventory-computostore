@@ -1,12 +1,15 @@
 import bcrypt
 
 from app.database.connect_mongo import ConnectMongo
+from app.exceptions.auth_exceptions import UserAlreadyExistsError, UserNotFoundError, IncorrectPasswordError, \
+    UserInactiveError
 from app.models.user import User
+from app.utils.validators import AuthValidators
 
 
 class UserController:
     @staticmethod
-    def to_dict(user: User):
+    def __to_dict(user: User) -> dict:
         return {
             "username": user.username,
             "password_hash": user.password_hash,
@@ -18,64 +21,64 @@ class UserController:
         }
 
     @staticmethod
-    def save_user(collection, user: User):
-        user_dict = UserController.to_dict(user)  # Convierte el objeto en un diccionario
-        result = collection.insert_one(user_dict)  # Inserta el usuario
-        return result.inserted_id  # Devuelve el ID del nuevo documento
+    def __insert_user(collection: [], user: User) -> None:
+        user_dict = UserController.__to_dict(user)  # Convierte el objeto en un diccionario
+        collection.insert_one(user_dict)  # Inserta el usuario
 
     @staticmethod
-    def create_user(username, password, name, email):
-        # Verificar si el nombre de usuario ya existe
+    def create_user(username: str, password: str, name: str, email: str) -> None:
+        email = AuthValidators.validate_email(email)
+
         connection = ConnectMongo()
-        collection = connection.get_collection("users")
+        try:
+            collection = connection.get_collection("users")
 
-        # Comprobar si el usuario ya existe en la base de datos
-        if collection.find_one({"username": username}):
+            # Comprobar si el usuario ya existe en la base de datos
+            if collection.find_one({"username": username}):
+                raise UserAlreadyExistsError()
+
+            # Hashear la contraseña
+            hashed_password = UserController.__hash_password(password)
+
+            # Crear el usuario
+            user = User(username=username, password_hash=hashed_password, name=name, email=email)
+
+            # Guardar el usuario en la base de datos
+            UserController.__insert_user(collection, user)
+        finally:
             connection.close_connection()
-            return {"error": "El nombre de usuario ya está en uso."}
-
-        # Hashear la contraseña
-        hashed_password = UserController.hash_password(password)
-
-        # Crear el usuario
-        user = User(username=username, password_hash=hashed_password, name=name, email=email)
-
-        # Guardar el usuario en la base de datos
-        user_id = UserController.save_user(collection, user)
-
-        connection.close_connection()
-
-        # Retornar el ID del usuario creado
-        return {"success": f"Usuario creado con ID: {user_id}"}
 
     @staticmethod
-    def verification_user(username, password):
-        # Buscar el usuario por nombre de usuario
+    def verification_user(username: str, password: str) -> bool:
         connection = ConnectMongo()
-        collection = connection.get_collection("users")
+        try:
+            collection = connection.get_collection("users")
 
-        user = collection.find_one({"username": username})
+            # Buscar el usuario por nombre de usuario
+            user = collection.find_one({"username": username})
+            if not user:
+                raise UserNotFoundError()
 
-        if not user:
-            connection.close_connection()
-            return {"error": "Usuario no encontrado."}
+            # Validar usuario activo
+            if not user["status"]:
+                raise UserInactiveError()
 
-        # Verificar la contraseña
-        if UserController.verification_password(user["password_hash"], password):
+            # Verificar la contraseña
+            if not UserController.__verification_password(user["password_hash"], password):
+                raise IncorrectPasswordError()
+
+            return True
+        finally:
             connection.close_connection()
-            return {"success": "Acceso exitoso."}
-        else:
-            connection.close_connection()
-            return {"error": "Contraseña incorrecta."}
 
     @staticmethod
-    def hash_password(password):
+    def __hash_password(password: str) -> str:
         # Genera un salt
         salt = bcrypt.gensalt()
         # Hashea la contraseña
         return bcrypt.hashpw(password.encode('utf-8'), salt)
 
     @staticmethod
-    def verification_password(stored_hash, password):
+    def __verification_password(stored_hash: str, password: str) -> bool:
         # Verifica si la contraseña coincide con el hash almacenado
         return bcrypt.checkpw(password.encode('utf-8'), stored_hash)
