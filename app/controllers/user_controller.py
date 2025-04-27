@@ -21,7 +21,7 @@ class UserController:
         }
 
     @staticmethod
-    def __insert_user(collection: [], user: User) -> None:
+    def __insert_user(collection: list, user: User) -> None:
         user_dict = UserController.__to_dict(user)  # Convierte el objeto en un diccionario
         collection.insert_one(user_dict)  # Inserta el usuario
 

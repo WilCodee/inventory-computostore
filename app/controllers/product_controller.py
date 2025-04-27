@@ -42,12 +42,12 @@ class ProductController:
         return product_dict
 
     @staticmethod
-    def __insert(collection: [], product: Product) -> None:
+    def __insert(collection: list, product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.insert_one(product_dict)  # Inserta el producto
 
     @staticmethod
-    def __update(collection: [], product: Product) -> None:
+    def __update(collection: list, product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.update_one(
             {"product_code": product.product_code},
@@ -104,3 +104,69 @@ class ProductController:
             ProductController.__update(collection, updated_product)
         finally:
             connection.close_connection()
+
+    @staticmethod
+    def get_product_by_code(product_code: str) -> Product:
+        """
+        Obtiene un producto de la base de datos por su código y lo devuelve como un objeto Product.
+        """
+        connection = ConnectMongo()
+        try:
+            collection = connection.get_collection("products")
+
+            # Buscar el producto por su código
+            product_data = collection.find_one({"product_code": product_code})
+            if not product_data:
+                raise ProductNotFoundError()
+
+            # Convertir los datos del producto en un objeto Product
+            product = ProductController.__convert_documet_to_product(product_data)
+
+            return product
+        finally:
+            connection.close_connection()
+
+    @staticmethod
+    def list_all_products() -> list[Product]:
+        """
+        Lista todos los productos de la base de datos y los devuelve como una lista de objetos Product.
+        """
+        connection = ConnectMongo()
+        try:
+            collection = connection.get_collection("products")
+
+            # Obtener todos los productos de la colección
+            products_data = collection.find()
+
+            # Convertir cada documento en un objeto Product
+            products = []
+            for product_data in products_data:
+                product = ProductController.__convert_documet_to_product(product_data)
+                products.append(product)
+
+            return products
+        finally:
+            connection.close_connection()
+
+    @staticmethod
+    def __convert_documet_to_product(product_data: dict) -> Product:
+        """
+        Convierte un documento de producto de la base de datos en un objeto Product.
+        """
+        product = Product(
+            product_code=product_data.get("product_code"),
+            brand=product_data.get("brand"),
+            model=product_data.get("model"),
+            serial_number=product_data.get("serial_number"),
+            name=product_data.get("name"),
+            description=product_data.get("description"),
+            stock=product_data.get("stock"),
+            price=Decimal(product_data.get("price").to_decimal()),
+            memory_ram=product_data.get("memory_ram"),
+            memory_rom=product_data.get("memory_rom"),
+            processor=product_data.get("processor"),
+            date_creation=product_data.get("date_creation")
+        )
+        product.date_update = product_data.get("date_update")
+        return product
+    
