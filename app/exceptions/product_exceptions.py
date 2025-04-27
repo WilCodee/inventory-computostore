@@ -17,6 +17,13 @@ class InvalidStockError(ProductError):
         super().__init__(message)
 
 
+class InvalidPriceError(ProductError):
+    """Se lanza cuando se intenta asignar un precio inválido."""
+
+    def __init__(self, message="Importe de precio inválido. Debe ser un número decimal."):
+        super().__init__(message)
+
+
 class DuplicateProductError(ProductError):
     """Se lanza cuando se intenta crear un producto que ya existe."""
 
