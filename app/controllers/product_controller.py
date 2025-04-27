@@ -120,21 +120,8 @@ class ProductController:
                 raise ProductNotFoundError()
 
             # Convertir los datos del producto en un objeto Product
-            product = Product(
-                product_code=product_data.get("product_code"),
-                brand=product_data.get("brand"),
-                model=product_data.get("model"),
-                serial_number=product_data.get("serial_number"),
-                name=product_data.get("name"),
-                description=product_data.get("description"),
-                stock=product_data.get("stock"),
-                price=Decimal(product_data.get("price").to_decimal()),
-                memory_ram=product_data.get("memory_ram"),
-                memory_rom=product_data.get("memory_rom"),
-                processor=product_data.get("processor"),
-                date_creation=product_data.get("date_creation")
-            )
-            product.date_update = product_data.get("date_update")
+            product = ProductController.convert_documet_to_product(product_data)
+
             return product
         finally:
             connection.close_connection()
@@ -154,24 +141,32 @@ class ProductController:
             # Convertir cada documento en un objeto Product
             products = []
             for product_data in products_data:
-                product = Product(
-                    product_code=product_data.get("product_code"),
-                    brand=product_data.get("brand"),
-                    model=product_data.get("model"),
-                    serial_number=product_data.get("serial_number"),
-                    name=product_data.get("name"),
-                    description=product_data.get("description"),
-                    stock=product_data.get("stock"),
-                    price=Decimal(product_data.get("price").to_decimal()),
-                    memory_ram=product_data.get("memory_ram"),
-                    memory_rom=product_data.get("memory_rom"),
-                    processor=product_data.get("processor"),
-                    date_creation=product_data.get("date_creation")
-                )
-                product.date_update = product_data.get("date_update")
+                product = ProductController.convert_documet_to_product(product_data)
                 products.append(product)
 
             return products
         finally:
             connection.close_connection()
 
+    @staticmethod
+    def convert_documet_to_product(product_data: dict) -> Product:
+        """
+        Convierte un documento de producto de la base de datos en un objeto Product.
+        """
+        product = Product(
+            product_code=product_data.get("product_code"),
+            brand=product_data.get("brand"),
+            model=product_data.get("model"),
+            serial_number=product_data.get("serial_number"),
+            name=product_data.get("name"),
+            description=product_data.get("description"),
+            stock=product_data.get("stock"),
+            price=Decimal(product_data.get("price").to_decimal()),
+            memory_ram=product_data.get("memory_ram"),
+            memory_rom=product_data.get("memory_rom"),
+            processor=product_data.get("processor"),
+            date_creation=product_data.get("date_creation")
+        )
+        product.date_update = product_data.get("date_update")
+        return product
+    
