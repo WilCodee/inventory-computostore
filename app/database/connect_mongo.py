@@ -1,4 +1,3 @@
-# database/conexion_mongo.py
 import os
 
 from pymongo import MongoClient
@@ -7,13 +6,13 @@ from pymongo import MongoClient
 class ConnectMongo:
     def __init__(self):
         # Usa variables de entorno para seguridad
-        self.uri = os.getenv("MONGO_URI")
-        self.db_name = os.getenv("MONGO_DB_NAME")
-        self.client = MongoClient(self.uri)
-        self.db = self.client[self.db_name]
+        self.__uri = os.getenv("MONGO_URI")
+        self.__db_name = os.getenv("MONGO_DB_NAME")
+        self.__client = MongoClient(self.__uri)
+        self.__db = self.__client[self.__db_name]
 
     def get_collection(self, name_collection):
-        return self.db[name_collection]
+        return self.__db[name_collection]
 
     def close_connection(self):
-        self.client.close()
+        self.__client.close()
