@@ -120,7 +120,7 @@ class ProductController:
                 raise ProductNotFoundError()
 
             # Convertir los datos del producto en un objeto Product
-            product = ProductController.convert_documet_to_product(product_data)
+            product = ProductController.__convert_documet_to_product(product_data)
 
             return product
         finally:
@@ -141,7 +141,7 @@ class ProductController:
             # Convertir cada documento en un objeto Product
             products = []
             for product_data in products_data:
-                product = ProductController.convert_documet_to_product(product_data)
+                product = ProductController.__convert_documet_to_product(product_data)
                 products.append(product)
 
             return products
@@ -149,7 +149,7 @@ class ProductController:
             connection.close_connection()
 
     @staticmethod
-    def convert_documet_to_product(product_data: dict) -> Product:
+    def __convert_documet_to_product(product_data: dict) -> Product:
         """
         Convierte un documento de producto de la base de datos en un objeto Product.
         """
