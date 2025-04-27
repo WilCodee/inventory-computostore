@@ -42,12 +42,12 @@ class ProductController:
         return product_dict
 
     @staticmethod
-    def __insert(collection: [], product: Product) -> None:
+    def __insert(collection: list, product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.insert_one(product_dict)  # Inserta el producto
 
     @staticmethod
-    def __update(collection: [], product: Product) -> None:
+    def __update(collection: list, product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.update_one(
             {"product_code": product.product_code},
