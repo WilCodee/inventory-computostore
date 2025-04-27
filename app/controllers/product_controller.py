@@ -1,42 +1,65 @@
+from datetime import datetime
 from decimal import Decimal
 
 from bson.decimal128 import Decimal128
 
 from app.database.connect_mongo import ConnectMongo
-from app.exceptions.product_exceptions import *
+from app.exceptions.product_exceptions import DuplicateProductError, ProductNotFoundError
 from app.models.product import Product
+from app.utils.validators import ProductValidators
 
 
 class ProductController:
     @staticmethod
-    def __to_dict(product: Product) -> {}:
-        price_to_mongo = Decimal128(product.price)
-        return {
-            "product_code": product.product_code,
-            "brand": product.brand,
-            "model": product.model,
-            "serial_number": product.serial_number,
-            "name": product.name,
-            "description": product.description,
-            "stock": product.stock,
-            "price": price_to_mongo,
-            "memory_ram": product.memory_ram,
-            "memory_rom": product.memory_rom,
-            "processor": product.processor,
-            "date_creation": product.date_creation,
-        }
+    def __to_dict(product: Product) -> dict:
+        product_dict = {"product_code": product.product_code}
+
+        if product.brand is not None:
+            product_dict["brand"] = product.brand
+        if product.model is not None:
+            product_dict["model"] = product.model
+        if product.serial_number is not None:
+            product_dict["serial_number"] = product.serial_number
+        if product.name is not None:
+            product_dict["name"] = product.name
+        if product.description is not None:
+            product_dict["description"] = product.description
+        if product.stock is not None:
+            product_dict["stock"] = product.stock
+        if product.price is not None:
+            price_to_mongo = Decimal128(product.price)
+            product_dict["price"] = price_to_mongo
+        if product.memory_ram is not None:
+            product_dict["memory_ram"] = product.memory_ram
+        if product.memory_rom is not None:
+            product_dict["memory_rom"] = product.memory_rom
+        if product.processor is not None:
+            product_dict["processor"] = product.processor
+        if product.date_creation is not None:
+            product_dict["date_creation"] = product.date_creation
+        product_dict["date_update"] = product.date_update
+
+        return product_dict
 
     @staticmethod
-    def __save_product(collection: [], product: Product) -> None:
+    def __insert(collection: [], product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.insert_one(product_dict)  # Inserta el producto
+
+    @staticmethod
+    def __update(collection: [], product: Product) -> None:
+        product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
+        collection.update_one(
+            {"product_code": product.product_code},
+            {"$set": product_dict}
+        )  # Inserta el producto
 
     @staticmethod
     def create_product(product_code: str, brand: str, model: str, serial_number: str, name: str, description: str,
                        stock: int, price: Decimal, memory_ram: int = None, memory_rom: int = None,
                        processor: str = None) -> None:
-        if stock < 0:
-            raise InvalidStockError()
+        stock = ProductValidators.validate_stock(stock)
+        price = ProductValidators.validate_price(price)
 
         connection = ConnectMongo()
         try:
@@ -44,14 +67,40 @@ class ProductController:
 
             # Comprobar si el product ya existe en la base de datos
             if collection.find_one({"product_code": product_code}):
-                connection.close_connection()
                 raise DuplicateProductError()
 
             # Crear el producto
             product = Product(product_code, brand, model, serial_number, name, description, stock, price, memory_ram,
-                              memory_rom, processor)
+                              memory_rom, processor, date_creation=datetime.now())
 
             # Guardar el producto en la base de datos
-            ProductController.__save_product(collection, product)
+            ProductController.__insert(collection, product)
+        finally:
+            connection.close_connection()
+
+    @staticmethod
+    def update_product(product_code: str, brand: str = None, model: str = None, serial_number: str = None,
+                       name: str = None, description: str = None, stock: int = None, price: Decimal = None,
+                       memory_ram: int = None, memory_rom: int = None, processor: str = None) -> None:
+        if stock is not None:
+            stock = ProductValidators.validate_stock(stock)
+        if price is not None:
+            price = ProductValidators.validate_price(price)
+
+        connection = ConnectMongo()
+        try:
+            collection = connection.get_collection("products")
+
+            # Buscar si existe el producto
+            product = collection.find_one({"product_code": product_code})
+            if not product:
+                raise ProductNotFoundError()
+
+            # Construir el nuevo documento actualizado
+            updated_product = Product(product_code, brand, model, serial_number, name, description, stock, price,
+                                      memory_ram, memory_rom, processor)
+
+            # Actualizar el producto en la colección
+            ProductController.__update(collection, updated_product)
         finally:
             connection.close_connection()

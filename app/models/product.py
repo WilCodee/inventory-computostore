@@ -4,7 +4,8 @@ from decimal import Decimal
 
 class Product:
     def __init__(self, product_code: str, brand: str, model: str, serial_number: str, name: str, description: str,
-                 stock: int, price: Decimal, memory_ram: int = None, memory_rom: int = None, processor: str = None):
+                 stock: int, price: Decimal, memory_ram: int = None, memory_rom: int = None, processor: str = None,
+                 date_creation: datetime = None):
         self.__product_code = product_code
         self.__brand = brand
         self.__model = model
@@ -16,7 +17,8 @@ class Product:
         self.__memory_ram = memory_ram
         self.__memory_rom = memory_rom
         self.__processor = processor
-        self.__date_creation = datetime.now()
+        self.__date_update = datetime.now()
+        self.__date_creation = date_creation
 
     @property
     def product_code(self):
@@ -105,6 +107,14 @@ class Product:
     @processor.setter
     def processor(self, processor: str):
         self.__processor = processor
+
+    @property
+    def date_update(self):
+        return self.__date_update
+
+    @date_update.setter
+    def date_update(self, date_update: str):
+        self.__date_update = date_update
 
     @property
     def date_creation(self):
