@@ -138,3 +138,40 @@ class ProductController:
             return product
         finally:
             connection.close_connection()
+
+    @staticmethod
+    def list_all_products() -> list[Product]:
+        """
+        Lista todos los productos de la base de datos y los devuelve como una lista de objetos Product.
+        """
+        connection = ConnectMongo()
+        try:
+            collection = connection.get_collection("products")
+
+            # Obtener todos los productos de la colección
+            products_data = collection.find()
+
+            # Convertir cada documento en un objeto Product
+            products = []
+            for product_data in products_data:
+                product = Product(
+                    product_code=product_data.get("product_code"),
+                    brand=product_data.get("brand"),
+                    model=product_data.get("model"),
+                    serial_number=product_data.get("serial_number"),
+                    name=product_data.get("name"),
+                    description=product_data.get("description"),
+                    stock=product_data.get("stock"),
+                    price=Decimal(product_data.get("price").to_decimal()),
+                    memory_ram=product_data.get("memory_ram"),
+                    memory_rom=product_data.get("memory_rom"),
+                    processor=product_data.get("processor"),
+                    date_creation=product_data.get("date_creation")
+                )
+                product.date_update = product_data.get("date_update")
+                products.append(product)
+
+            return products
+        finally:
+            connection.close_connection()
+
