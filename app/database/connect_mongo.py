@@ -1,4 +1,3 @@
-# database/conexion_mongo.py
 import os
 
 from pymongo import MongoClient
