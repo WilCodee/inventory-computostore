@@ -7,7 +7,7 @@ Proyecto para la presentación del trabajo final del curso **Fundamentos de Prog
 ### 📋 Prerrequisitos:
 - Tener instalado **Python 3.11**.
 
-### ⚙️ Levantar entorno de desarrollo:
+### ⚙️ Levantar entorno de desarrollo :
 
 ```bash
 python -m venv .venv
