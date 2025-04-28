@@ -2,13 +2,14 @@ from datetime import datetime
 
 
 class User:
-    def __init__(self, username: str, password_hash: str, name: str, email: str, role: str = "admin"):
+    def __init__(self, username: str, password_hash: str, name: str, email: str, role: str = "admin",
+                 date_creation: datetime = None):
         self.__username = username
         self.__password_hash = password_hash
         self.__name = name
         self.__email = email
         self.__role = role
-        self.__date_creation = datetime.now()
+        self.__date_creation = date_creation
         self.__status = True
 
     @property

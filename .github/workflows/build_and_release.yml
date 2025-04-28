@@ -1,0 +1,55 @@
+name: Build and Release Executable
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+        contents: write
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Extract project metadata
+        id: metadata
+        run: |
+          NAME=$(python setup.py --name)
+          VERSION=$(python setup.py --version)
+          echo "NAME=$NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Set environment variables
+        run: |
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+          echo "MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}" >> .env
+
+      - name: Build executable
+        run: |
+          pyinstaller --onefile --name "${{ env.NAME }}-${{ env.VERSION }}" main.py
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: dist/${{ env.NAME }}-${{ env.VERSION }}
+          tag: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body: "Nuevo release generado automáticamente con Github Actions."
+          draft: false
+          prerelease: false
