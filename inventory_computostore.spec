@@ -2,7 +2,7 @@
 
 # Define los metadatos de la app
 NAME = 'inventory-computostore'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 block_cipher = None
 
@@ -33,7 +33,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name=f"{NAME}-{VERSION}",
+    name=f"{NAME}-{VERSION}.exe",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
