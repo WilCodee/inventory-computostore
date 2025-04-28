@@ -62,7 +62,7 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: dist/${{ env.NAME }}-${{ env.VERSION }}
+          artifacts: dist/${{ env.NAME }}-${{ env.VERSION }}.exe
           tag: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
           body: "Nuevo release generado automáticamente con Github Actions."

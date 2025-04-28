@@ -2,7 +2,7 @@
 
 # Define los metadatos de la app
 NAME = 'inventory-computostore'
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 
 block_cipher = None
 
