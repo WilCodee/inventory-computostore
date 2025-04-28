@@ -2,3 +2,4 @@ dotenv
 bcrypt
 pymongo
 pytest
+pyinstaller

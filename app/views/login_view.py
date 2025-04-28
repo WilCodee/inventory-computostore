@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from app.controllers.user_controller import UserController
+from main import resource_path
 
 
 class LoginView:
@@ -12,7 +13,7 @@ class LoginView:
         self.root.resizable(False, False)
 
         # Logo
-        self.logo = tk.PhotoImage(file="app/assets/logo.png")
+        self.logo = tk.PhotoImage(file=resource_path("app/assets/logo.png"))
         self.logo_label = tk.Label(self.root, image=self.logo)
         self.logo_label.pack(pady=10)
 
@@ -40,6 +41,6 @@ class LoginView:
             # Verificar usuario usando el controlador
             user = UserController.verification_user(username, password)
             if user:
-                messagebox.showinfo("Éxito", f"Inicio de sesión exitoso.\n!Bienvenido, {user.name}!")
+                messagebox.showinfo("Éxito", f"Inicio de sesión exitoso.\n¡Bienvenido, {user.name}!")
         except Exception as e:
             messagebox.showerror("Error", str(e))
