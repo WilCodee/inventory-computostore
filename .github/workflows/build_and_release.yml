@@ -11,7 +11,7 @@ jobs:
 
     permissions:
         contents: write
-  
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -30,21 +30,32 @@ jobs:
         run: |
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
           echo "MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}" >> .env
-        
+
       - name: Read NAME and VERSION from spec file
         id: spec
         shell: pwsh
         run: |
-          $content = Get-Content inventory_computostore.spec
-          $name_line = $content | Where-Object { $_ -match "NAME\s*=" }
-          $version_line = $content | Where-Object { $_ -match "VERSION\s*=" }
-          
-          $name = ($name_line -split "'")[1]
-          version = ($version_line -split "'")[1]
-        
+          function Get-ValueFromSpec {
+              param (
+                  [string]$key
+              )
+
+              $content = Get-Content inventory_computostore.spec -Raw
+
+              # Usar regex para buscar la clave
+              if ($content -match "$key\s*=\s*'([^']+)'") {
+                  return $Matches[1]
+              } else {
+                  throw "$key not found in spec file"
+              }
+          }
+
+          $name = Get-ValueFromSpec -key "NAME"
+          $version = Get-ValueFromSpec -key "VERSION"
+
           echo "NAME=$name" >> $env:GITHUB_ENV
           echo "VERSION=$version" >> $env:GITHUB_ENV
-            
+
       - name: Build executable
         run: pyinstaller inventory_computostore.spec
 
