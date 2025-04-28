@@ -30,7 +30,15 @@ jobs:
         run: |
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
           echo "MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}" >> .env
-
+        
+      - name: Read NAME and VERSION from spec file
+        id: spec
+        run: |
+          NAME=$(grep "^NAME" inventory_computostore.spec | cut -d"'" -f2)
+          VERSION=$(grep "^VERSION" inventory_computostore.spec | cut -d"'" -f2)
+          echo "NAME=$NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+            
       - name: Build executable
         run: pyinstaller inventory_computostore.spec
 

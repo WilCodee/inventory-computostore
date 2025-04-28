@@ -1,5 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+# Define los metadatos de la app
+NAME = 'inventory-computostore'
+VERSION = '0.0.2'
+
 block_cipher = None
 
 a = Analysis(
@@ -29,7 +33,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='inventory-computostore-0.0.1',  # Versión de la app
+    name=f"{NAME}-{VERSION}",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
