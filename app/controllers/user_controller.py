@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import bcrypt
 
 from app.database.connect_mongo import ConnectMongo
@@ -21,7 +23,7 @@ class UserController:
         }
 
     @staticmethod
-    def __insert_user(collection: [], user: User) -> None:
+    def __insert_user(collection: list, user: User) -> None:
         user_dict = UserController.__to_dict(user)  # Convierte el objeto en un diccionario
         collection.insert_one(user_dict)  # Inserta el usuario
 
@@ -41,7 +43,8 @@ class UserController:
             hashed_password = UserController.__hash_password(password)
 
             # Crear el usuario
-            user = User(username=username, password_hash=hashed_password, name=name, email=email)
+            user = User(username=username, password_hash=hashed_password, name=name, email=email,
+                        date_creation=datetime.now())
 
             # Guardar el usuario en la base de datos
             UserController.__insert_user(collection, user)
@@ -49,7 +52,7 @@ class UserController:
             connection.close_connection()
 
     @staticmethod
-    def verification_user(username: str, password: str) -> bool:
+    def verification_user(username: str, password: str) -> User:
         connection = ConnectMongo()
         try:
             collection = connection.get_collection("users")
@@ -67,7 +70,7 @@ class UserController:
             if not UserController.__verification_password(user["password_hash"], password):
                 raise IncorrectPasswordError()
 
-            return True
+            return UserController.__convert_document_to_user(user)
         finally:
             connection.close_connection()
 
@@ -82,3 +85,19 @@ class UserController:
     def __verification_password(stored_hash: str, password: str) -> bool:
         # Verifica si la contraseña coincide con el hash almacenado
         return bcrypt.checkpw(password.encode('utf-8'), stored_hash)
+
+    @staticmethod
+    def __convert_document_to_user(user_data: dict) -> User:
+        """
+        Convierte un documento de usaurio de la base de datos en un objeto User.
+        """
+        user = User(
+            username=user_data.get("username"),
+            password_hash=user_data.get("password_hash"),
+            name=user_data.get("name"),
+            email=user_data.get("email"),
+            role=user_data.get("role"),
+            date_creation=user_data.get("date_creation")
+        )
+        user.status = user_data.get("status")
+        return user
