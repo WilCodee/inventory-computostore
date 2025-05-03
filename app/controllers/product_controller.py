@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from bson.decimal128 import Decimal128
 
@@ -42,12 +43,12 @@ class ProductController:
         return product_dict
 
     @staticmethod
-    def __insert(collection: list, product: Product) -> None:
+    def __insert(collection: [Any], product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.insert_one(product_dict)  # Inserta el producto
 
     @staticmethod
-    def __update(collection: list, product: Product) -> None:
+    def __update(collection: [Any], product: Product) -> None:
         product_dict = ProductController.__to_dict(product)  # Convierte el objeto en un diccionario
         collection.update_one(
             {"product_code": product.product_code},
@@ -169,4 +170,3 @@ class ProductController:
         )
         product.date_update = product_data.get("date_update")
         return product
-    

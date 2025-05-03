@@ -26,3 +26,10 @@ def test_validate_price_float_a_decimal():
 def test_validate_price_invalid():
     with pytest.raises(InvalidPriceError):
         ProductValidators.validate_price("not_a_number")  # No puede convertirse a decimal
+
+
+def test_validate_stock_bool_a_int():
+    with pytest.raises(InvalidPriceError):
+        ProductValidators.validate_price(True)  # No puede convertir de booleano a entero
+    with pytest.raises(InvalidPriceError):
+        ProductValidators.validate_price(False)  # No puede convertir de booleano a entero
