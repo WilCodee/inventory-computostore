@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import bcrypt
+from pymongo.errors import ServerSelectionTimeoutError
 
 from app.database.connect_mongo import ConnectMongo
 from app.exceptions.auth_exceptions import UserAlreadyExistsError, UserNotFoundError, IncorrectPasswordError, \
@@ -71,6 +72,9 @@ class UserController:
                 raise IncorrectPasswordError()
 
             return UserController.__convert_document_to_user(user)
+        except ServerSelectionTimeoutError:
+            raise ServerSelectionTimeoutError("Su IP no está autorizada para acceder a  la base de datos, contactar "
+                                              "al administrador!")
         finally:
             connection.close_connection()
 
