@@ -8,6 +8,9 @@ from app.exceptions.product_exceptions import InvalidStockError, InvalidPriceErr
 class ProductValidators:
     @staticmethod
     def validate_stock(stock) -> int:
+        if isinstance(stock, (float, bool, Decimal)):
+            raise InvalidStockError()
+
         if not isinstance(stock, int):
             try:
                 stock = int(stock)
@@ -21,6 +24,9 @@ class ProductValidators:
 
     @staticmethod
     def validate_price(price) -> Decimal:
+        if isinstance(price, bool):
+            raise InvalidPriceError()
+
         if not isinstance(price, Decimal):
             try:
                 price = Decimal(price)
